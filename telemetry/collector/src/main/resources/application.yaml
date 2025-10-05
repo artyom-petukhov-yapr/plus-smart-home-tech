@@ -1,0 +1,8 @@
+# конфигурация для kafka
+kafka:
+  topics:
+    # название топика для событий хабов
+    hubs: "telemetry.hubs.v1"
+    # название топика для событий устройств
+    sensors: "telemetry.sensors.v1"
+  bootstrap-server: "localhost:9092"
