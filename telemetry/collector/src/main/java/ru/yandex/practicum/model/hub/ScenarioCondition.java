@@ -1,5 +1,7 @@
 package ru.yandex.practicum.model.hub;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,16 +17,19 @@ public class ScenarioCondition {
     /**
      * Идентификатор устройства
      */
+    @NotBlank
     String sensorId;
 
     /**
      * Тип условия
      */
+    @NotNull
     ConditionType type;
 
     /**
      * Операция, применяемая к условию
      */
+    @NotNull
     ConditionOperation operation;
 
     /**

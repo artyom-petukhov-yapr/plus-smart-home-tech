@@ -2,6 +2,7 @@ package ru.yandex.practicum.model.sensor;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -29,13 +30,13 @@ public abstract class SensorEvent {
     /**
      * Id сенсора
      */
-    @NotNull
+    @NotBlank
     String id;
 
     /**
      * Id хаба
      */
-    @NotNull
+    @NotBlank
     String hubId;
 
     /**

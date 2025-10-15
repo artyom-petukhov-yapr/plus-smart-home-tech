@@ -1,5 +1,6 @@
 package ru.yandex.practicum.model.hub;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -15,6 +16,7 @@ public class ScenarioRemovedEvent extends HubEvent {
     /**
      * Название сценария, уникальное в рамках хаба
      */
+    @NotBlank
     String name;
 
     @Override
