@@ -12,19 +12,16 @@ public class MotionSensorEvent extends SensorEvent{
     /**
      * Качество сигнала связи
      */
-    @NotNull
     int linkQuality;
 
     /**
      * Обнаружено ли движение
      */
-    @NotNull
     boolean motion;
 
     /**
      * Уровень напряжения
      */
-    @NotNull
     int voltage;
 
     @Override
