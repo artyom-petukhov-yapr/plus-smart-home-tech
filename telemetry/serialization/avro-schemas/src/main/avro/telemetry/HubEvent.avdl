@@ -1,4 +1,103 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
 protocol HubEventProtocol {
+	// Перечисление, описывающее типы устройств
+	enum DeviceTypeAvro {
+		MOTION_SENSOR,
+		TEMPERATURE_SENSOR,
+		LIGHT_SENSOR,
+		CLIMATE_SENSOR,
+		SWITCH_SENSOR
+	}
 
+	// Перечисление, описывающее типы условий для сценариев
+	enum ConditionTypeAvro {
+		MOTION,
+		LUMINOSITY,
+		SWITCH,
+		TEMPERATURE,
+		CO2LEVEL,
+		HUMIDITY
+	}
+
+	// Перечисление, описывающее операторы, которые допустимы для построения условий
+	enum ConditionOperationAvro {
+		EQUALS,
+		GREATER_THAN,
+		LOWER_THAN
+	}
+
+	// Перечисление, описывающее типы действий
+	enum ActionTypeAvro {
+		ACTIVATE,
+		DEACTIVATE,
+		INVERSE,
+		SET_VALUE
+	}
+
+	// Запись, описывающая событие добавления устройства
+	record DeviceAddedEventAvro {
+		// Уникальный идентификатор устройства
+		string id;
+		// Тип устройства
+		DeviceTypeAvro type;
+	}
+
+	// Запись, описывающая событие удаления устройства
+	record DeviceRemovedEventAvro {
+		// Уникальный идентификатор устройства
+		string id;
+	}
+
+	// Запись, описывающая условия активации сценария
+	record ScenarioConditionAvro {
+		// Идентификатор устройства
+		string sensor_id;
+		// Тип условия
+		ConditionTypeAvro type;
+		// Операция, применяемая к условию
+		ConditionOperationAvro operation;
+		// Значение для сравнения, может быть null, int или boolean
+		union { null, int, boolean } value = null;
+	}
+
+	// Запись, описывающая действия, выполняемые устройством в рамках сценария
+	record DeviceActionAvro {
+		// Идентификатор устройства
+		string sensor_id;
+		// Тип действия
+		ActionTypeAvro type;
+		// Значение, устанавливаемое при выполнении действия (если применимо)
+		int? value = null;
+	}
+
+	// Запись, описывающая событие добавления сценария
+	record ScenarioAddedEventAvro {
+		// Уникальное название сценария
+		string name;
+		// Набор условий активации сценария
+		array<ScenarioConditionAvro> conditions;
+		// Набор действий, выполняемых при активации сценария
+		array<DeviceActionAvro> actions;
+	}
+
+	// Запись, описывающая событие удаления сценария
+	record ScenarioRemovedEventAvro {
+		// Название сценария, уникальное в рамках хаба
+		string name;
+	}
+
+	// Запись, описывающая событие, происходящее в хабе
+	record HubEventAvro {
+		// Идентификатор хаба
+		string hub_id;
+		// Метка времени события
+		timestamp_ms timestamp;
+		// Поле, содержащее одно из возможных событий
+		union {
+			DeviceAddedEventAvro,
+			DeviceRemovedEventAvro,
+			ScenarioAddedEventAvro,
+			ScenarioRemovedEventAvro
+		} payload;
+	}
 }
