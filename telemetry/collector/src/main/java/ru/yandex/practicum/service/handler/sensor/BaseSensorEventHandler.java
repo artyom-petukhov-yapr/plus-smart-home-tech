@@ -5,13 +5,14 @@ import lombok.experimental.FieldDefaults;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
-import ru.yandex.practicum.model.sensor.SensorEvent;
-import ru.yandex.practicum.model.sensor.SensorEventType;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
-@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+import java.time.Instant;
+
 @RequiredArgsConstructor
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
     final KafkaEventProducer kafkaEventProducer;
 
@@ -25,17 +26,17 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
      * Тип события, которое обрабатывает данный обработчик.
      */
     @Override
-    public abstract SensorEventType getEventType();
+    public abstract SensorEventProto.PayloadCase getEventType();
 
     /**
      * Преобразовать SensorEvent в Avro-событие.
      */
-    protected abstract T toAvro(SensorEvent sensorEvent);
+    protected abstract T toAvro(SensorEventProto sensorEvent);
 
     @Override
-    public void handle(SensorEvent event) {
-        if (event.getEventType() != getEventType()) {
-            throw new IllegalArgumentException("Illegal event type: %s".formatted(event.getEventType()));
+    public void handle(SensorEventProto event) {
+        if (!event.getPayloadCase().equals(getEventType())) {
+            throw new IllegalArgumentException("Illegal event type: %s".formatted(event.getPayloadCase()));
         }
 
         T payload = toAvro(event);
@@ -43,7 +44,7 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
         SensorEventAvro sensorEventAvro = SensorEventAvro.newBuilder()
                 .setId(event.getId())
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(payload)
                 .build();
 

@@ -5,13 +5,14 @@ import lombok.experimental.FieldDefaults;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Value;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.model.hub.HubEvent;
-import ru.yandex.practicum.model.hub.HubEventType;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
-@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+import java.time.Instant;
+
 @RequiredArgsConstructor
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
     final KafkaEventProducer kafkaEventProducer;
 
@@ -25,24 +26,24 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
      * Тип события, которое обрабатывает данный обработчик.
      */
     @Override
-    public abstract HubEventType getEventType();
+    public abstract HubEventProto.PayloadCase getEventType();
 
     /**
      * Преобразовать HubEvent в Avro-событие.
      */
-    protected abstract T toAvro(HubEvent hubEvent);
+    protected abstract T toAvro(HubEventProto hubEvent);
 
     @Override
-    public void handle(HubEvent event) {
-        if (event.getEventType() != getEventType()) {
-            throw new IllegalArgumentException("Illegal event type: %s".formatted(event.getEventType()));
+    public void handle(HubEventProto event) {
+        if (!event.getPayloadCase().equals(getEventType())) {
+            throw new IllegalArgumentException("Illegal event type: %s".formatted(event.getPayloadCase()));
         }
 
         T payload = toAvro(event);
 
         HubEventAvro hubEventAvro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(payload)
                 .build();
 
