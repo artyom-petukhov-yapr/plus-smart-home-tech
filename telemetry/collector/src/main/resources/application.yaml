@@ -1,3 +1,6 @@
+spring:
+  application:
+    name: collector
 # конфигурация для kafka
 kafka:
   topics:
@@ -6,3 +9,6 @@ kafka:
     # название топика для событий устройств
     sensors: "telemetry.sensors.v1"
   bootstrap-server: "localhost:9092"
+grpc:
+  server:
+    port: 59091
